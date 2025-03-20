@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Detector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.05); /* Slightly enlarge the button */
+        }
+
+        hr {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        #result h3 {
+            color: #2e8b57;
+        }
+
+        .error {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Deepfake Detection</h1>
+        <p>Upload an image or video to check if it's a deepfake or not!</p>
+
+        <form method="POST" enctype="multipart/form-data">
+            <label for="file">Choose an image or video:</label>
+            <input type="file" name="file" id="file" required aria-label="Upload an image or video to check if it's a deepfake">
+            <button type="submit">Upload</button>
+        </form>
+
+        <hr>
+
+        <div id="result">
+            <!-- Prediction result will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        // Handle form submission via AJAX for instant result
+        const form = document.querySelector('form');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent page refresh
+
+            // Clear previous result
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            const formData = new FormData(form);
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                resultDiv.innerHTML = `<h3 class="error">Error: ${errorData.error}</h3>`;
+                return;
+            }
+
+            const data = await response.json();
+            if (data.prediction) {
+                resultDiv.innerHTML = `<h3>Prediction: ${data.prediction}</h3>`;
+            } else {
+                resultDiv.innerHTML = `<h3 class="error">Error: ${data.error}</h3>`;
+            }
+        });
+    </script>
+</body>
+</html>
